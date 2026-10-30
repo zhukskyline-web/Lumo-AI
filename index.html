@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<title>Lumo</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0d1021;--surf:#171b35;--line:#262b4d;--text:#f3eee3;--mute:#8b90ad;--lamp:#ffc46b;--lamp2:#ff9a5c;--lit:1;
+--disp:'Bricolage Grotesque',system-ui,sans-serif}
+*{box-sizing:border-box;margin:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:var(--bg);color:var(--text);font:16px/1.45 system-ui,-apple-system,'Segoe UI',sans-serif;overflow:hidden}
+body{display:flex;flex-direction:column;padding-top:env(safe-area-inset-top)}
+body::before{content:"";position:fixed;inset:-20% -20% auto;height:60%;pointer-events:none;
+background:radial-gradient(closest-side,rgba(255,196,107,calc(.16*var(--lit))),transparent);transition:background .6s}
+header{display:flex;align-items:center;gap:12px;padding:14px 18px 10px;position:relative}
+.orb{width:34px;height:34px;border-radius:50%;flex:none;background:radial-gradient(circle at 35% 30%,#fff3d6,var(--lamp) 45%,var(--lamp2));
+opacity:calc(.35 + .65*var(--lit));box-shadow:0 0 calc(30px*var(--lit)) calc(6px*var(--lit)) rgba(255,176,90,.55);transition:all .6s}
+.brand{font:700 22px var(--disp);letter-spacing:-.02em}
+.sub{font-size:12.5px;color:var(--mute)}
+.pill{margin-left:auto;text-align:right}
+.pill b{font:700 18px var(--disp)}
+main{flex:1;min-height:0;position:relative}
+section{position:absolute;inset:0;display:none;flex-direction:column}
+section.on{display:flex}
+#feed{flex:1;overflow-y:auto;padding:8px 16px 12px;display:flex;flex-direction:column;gap:10px;scroll-behavior:smooth}
+.m{max-width:86%;padding:10px 14px;border-radius:18px;white-space:pre-wrap;word-wrap:break-word;font-size:15.5px}
+.m.assistant{background:var(--surf);border:1px solid var(--line);border-bottom-left-radius:5px;align-self:flex-start}
+.m.user{background:linear-gradient(135deg,var(--lamp),var(--lamp2));color:#2a1a05;border-bottom-right-radius:5px;align-self:flex-end;font-weight:500}
+.m.note{align-self:center;background:none;color:var(--mute);font-size:13px;text-align:center}
+.m small{display:block;margin-top:6px;color:var(--mute);font-size:11.5px}
+.empty{margin:auto;text-align:center;color:var(--mute);padding:0 30px}
+.empty h2{font:700 26px var(--disp);color:var(--text);margin-bottom:6px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:16px}
+.chips button{background:var(--surf);border:1px solid var(--line);color:var(--text);padding:8px 13px;border-radius:99px;font:inherit;font-size:14px}
+.dots{display:inline-flex;gap:4px;padding:4px 0}
+.dots i{width:7px;height:7px;border-radius:50%;background:var(--lamp);animation:b 1s infinite}
+.dots i:nth-child(2){animation-delay:.15s}.dots i:nth-child(3){animation-delay:.3s}
+@keyframes b{0%,60%,100%{opacity:.25}30%{opacity:1}}
+.bar{display:flex;gap:8px;padding:8px 14px 10px;align-items:flex-end}
+textarea{flex:1;resize:none;max-height:120px;background:var(--surf);border:1px solid var(--line);color:var(--text);border-radius:22px;padding:11px 16px;font:inherit;font-size:15.5px;outline:none}
+textarea:focus-visible{border-color:var(--lamp)}
+#send{width:44px;height:44px;border-radius:50%;border:0;background:linear-gradient(135deg,var(--lamp),var(--lamp2));color:#2a1a05;font-size:20px;font-weight:700;flex:none}
+#send:disabled{opacity:.4}
+.plans{overflow-y:auto;padding:6px 16px 16px;display:flex;flex-direction:column;gap:12px}
+.plans h2{font:700 24px var(--disp);margin:4px 2px 0}
+.plans p.lead{color:var(--mute);font-size:14px;margin:-6px 2px 2px}
+.plan{background:var(--surf);border:1px solid var(--line);border-radius:20px;padding:16px;display:flex;gap:14px;align-items:center}
+.plan.cur{border-color:var(--lamp);box-shadow:0 0 0 1px var(--lamp) inset}
+.plan.hot{background:linear-gradient(160deg,#2a2347,var(--surf))}
+.plan h3{font:700 19px var(--disp)}
+.plan ul{list-style:none;color:var(--mute);font-size:13.5px;margin-top:4px}
+.plan .l{flex:1}
+.buy{border:0;border-radius:14px;padding:11px 15px;font:700 15px var(--disp);background:var(--lamp);color:#2a1a05;min-width:84px}
+.buy:disabled{background:var(--line);color:var(--mute)}
+button{cursor:pointer}button:active{transform:scale(.97)}
+button:focus-visible{outline:2px solid var(--lamp);outline-offset:2px}
+nav{display:flex;padding:6px 16px calc(8px + env(safe-area-inset-bottom));gap:8px;border-top:1px solid var(--line);background:var(--bg)}
+nav button{flex:1;background:none;border:0;color:var(--mute);font:500 15px var(--disp);padding:10px;border-radius:12px}
+nav button.on{background:var(--surf);color:var(--lamp)}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<header>
+  <div class="orb" id="orb"></div>
+  <div><div class="brand">Lumo</div><div class="sub" id="plan">…</div></div>
+  <div class="pill"><b id="bal">—</b><div class="sub">токенов</div></div>
+</header>
+<main>
+  <section id="chat" class="on">
+    <div id="feed"></div>
+    <div class="bar"><textarea id="in" rows="1" placeholder="Спроси что угодно"></textarea><button id="send" aria-label="Отправить">↑</button></div>
+  </section>
+  <section id="shop"><div class="plans" id="plans"></div></section>
+</main>
+<nav><button data-t="chat" class="on">Чат</button><button data-t="shop">Тарифы</button></nav>
+<script>
+const tg=Telegram.WebApp;tg.ready();tg.expand();
+try{tg.setHeaderColor('#0d1021');tg.setBackgroundColor('#0d1021')}catch(e){}
+const $=s=>document.querySelector(s),feed=$('#feed'),inp=$('#in'),send=$('#send');
+const fmt=n=>n.toLocaleString('ru-RU');
+let S=null,busy=false;
+const api=async(p,b)=>{const r=await fetch('/api/'+p,{method:b?'POST':'GET',headers:{'X-Init-Data':tg.initData,'Content-Type':'application/json'},body:b?JSON.stringify(b):undefined});
+  const j=await r.json().catch(()=>({}));if(!r.ok)throw Object.assign(j,{status:r.status});return j};
+const hap=t=>{try{tg.HapticFeedback.notificationOccurred(t)}catch(e){}};
+
+function setMe(m){S.me=m;$('#bal').textContent=fmt(m.balance);
+  const d=m.plan==='free'?'обновляется каждый день':'до '+new Date(m.until*1000).toLocaleDateString('ru-RU');
+  $('#plan').textContent=m.plan_name+' · '+d;
+  document.documentElement.style.setProperty('--lit',Math.max(.08,Math.min(1,m.balance/m.limit)));
+  drawPlans()}
+function add(role,text,extra){const d=document.createElement('div');d.className='m '+role;d.textContent=text;
+  if(extra){const s=document.createElement('small');s.textContent=extra;d.append(s)}
+  feed.querySelector('.empty')?.remove();feed.append(d);feed.scrollTop=feed.scrollHeight;return d}
+function empty(){feed.innerHTML=`<div class="empty"><h2>Чем помочь?</h2>Пиши как человеку. Каждый ответ тратит токены, баланс виден сверху.
+<div class="chips">${['Объясни простыми словами, что такое инфляция','Придумай идею для подарка','Помоги составить план на неделю'].map(t=>`<button>${t}</button>`).join('')}</div></div>`;
+  feed.querySelectorAll('.chips button').forEach(b=>b.onclick=()=>{inp.value=b.textContent;go()})}
+async function go(){const t=inp.value.trim();if(!t||busy)return;busy=true;send.disabled=true;inp.value='';inp.style.height='';
+  add('user',t);const w=add('assistant','');w.innerHTML='<span class="dots"><i></i><i></i><i></i></span>';
+  try{const r=await api('chat',{text:t});w.remove();add('assistant',r.reply,'−'+fmt(r.used)+' токенов');setMe(r.me);hap('success')}
+  catch(e){w.remove();hap('error');
+    if(e.error==='no_tokens'){add('note','Токены на сегодня закончились. Они обновятся завтра, или выбери тариф.');show('shop')}
+    else add('note','Не удалось получить ответ. Отправь сообщение ещё раз.')}
+  busy=false;send.disabled=false;inp.focus()}
+function drawPlans(){const c=S.me.plan;$('#plans').innerHTML=`<h2>Тарифы</h2><p class="lead">Оплата в Telegram Stars ⭐, 30 дней. Токены тратятся на каждый запрос.</p>`+
+  S.plans.map(p=>`<div class="plan ${p.id===c?'cur':''} ${p.id==='pro'?'hot':''}"><div class="l"><h3>${p.name}</h3><ul>${p.perks.map(x=>`<li>${x}</li>`).join('')}</ul></div>
+  ${p.id==='free'?`<button class="buy" disabled>${c==='free'?'Ваш':'Бесплатно'}</button>`:`<button class="buy" data-p="${p.id}">${p.stars} ⭐</button>`}</div>`).join('');
+  document.querySelectorAll('.buy[data-p]').forEach(b=>b.onclick=async()=>{b.disabled=true;
+    try{const {link}=await api('invoice',{plan:b.dataset.p});
+      tg.openInvoice(link,async st=>{if(st==='paid'){hap('success');const r=await api('me');S=r;setMe(r.me);show('chat');add('note','Тариф активирован. Приятного общения!')}b.disabled=false})}
+    catch(e){b.disabled=false;tg.showAlert('Не удалось создать счёт. Попробуй ещё раз.')}})}
+function show(t){document.querySelectorAll('section').forEach(s=>s.classList.toggle('on',s.id===t));
+  document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.t===t))}
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>show(b.dataset.t));
+send.onclick=go;
+inp.oninput=()=>{inp.style.height='auto';inp.style.height=Math.min(inp.scrollHeight,120)+'px'};
+inp.onkeydown=e=>{if(e.key==='Enter'&&!e.shiftKey&&innerWidth>700){e.preventDefault();go()}};
+(async()=>{try{S=await api('me');setMe(S.me);S.history.length?S.history.forEach(m=>add(m.role,m.content)):empty()}
+catch(e){feed.innerHTML='<div class="empty"><h2>Откройте в Telegram</h2>Приложение работает только внутри бота.</div>'}})();
+</script>
+</body>
+</html>
